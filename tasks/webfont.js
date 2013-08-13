@@ -232,7 +232,7 @@ module.exports = function(grunt) {
 						fontBaseName: fontBaseName,
 						glyphs: glyphs,
 						baseClass: syntax === 'bem' ? 'icon' : '',
-						classPrefix: 'icon' + (syntax === 'bem' ? '_' : '-'),
+						classPrefix: 'icon-',
 						styles: htmlStyles,
 						plainCss: plainCss
 					};
