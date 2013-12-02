@@ -1,6 +1,11 @@
 /*jshint node:true*/
+
+var path = require('path');
+
 module.exports = function(grunt) {
 	'use strict';
+
+	require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
 	grunt.initConfig({
 		webfont: {
@@ -129,7 +134,7 @@ module.exports = function(grunt) {
 				src: 'test/src/*.svg',
 				dest: 'test/tmp/non_css_demo',
 				options: {
-					stylesheet: 'styl',
+					stylesheet: 'less',
 					relativeFontPath: '../iamrelative',
 					htmlDemo: true
 				}
@@ -139,6 +144,47 @@ module.exports = function(grunt) {
 				dest: 'test/tmp/parent_source',
 				options: {
 					hashes: false
+				}
+			},
+			ligatures: {
+				src: 'test/src/*.svg',
+				dest: 'test/tmp/ligatures',
+				options: {
+					hashes: false,
+					ligatures: true
+				}
+			},
+			duplicate_names: {
+				src: '../grunt-webfont/test/src_duplicate_names/**/*.svg',
+				dest: 'test/tmp/duplicate_names',
+				options: {
+					hashes: false,
+					rename: function(name) {
+						return [path.basename(path.dirname(name)), path.basename(name)].join('-');
+					}
+				}
+			},
+			order: {
+				src: 'test/src/*.svg',
+				dest: 'test/tmp/order',
+				options: {
+					types: 'woff,svg',
+					order: 'svg,woff',
+					hashes: false
+				}
+			},
+			template_options: {
+				src: 'test/src/*.svg',
+				dest: 'test/tmp/template_options',
+				options: {
+					hashes: false,
+					syntax: 'bem',
+					stylesheet: 'less',
+					templateOptions: {
+						baseClass: 'glyph-icon',
+						classPrefix: 'glyph_',
+						mixinPrefix: 'make-icon-'
+					}
 				}
 			}
 		},
@@ -158,16 +204,15 @@ module.exports = function(grunt) {
 				undef: true
 			}
 		},
+		jscs: {
+			all: ['tasks/*.js']
+		},
 		clean: ['test/tmp']
 	});
 
 	grunt.loadTasks('tasks');
 
-	grunt.loadNpmTasks('grunt-contrib-jshint');
-	grunt.loadNpmTasks('grunt-contrib-nodeunit');
-	grunt.loadNpmTasks('grunt-contrib-clean');
-
-	grunt.registerTask('default', ['clean', 'webfont', 'nodeunit', 'jshint', 'clean']);
+	grunt.registerTask('default', ['jshint', 'jscs', 'clean', 'webfont', 'nodeunit', 'clean']);
 	grunt.registerTask('build', ['default']);
 
 };

@@ -12,7 +12,9 @@ This task will make all you need to use font-face icon on your website: font in 
 * BEM or Bootstrap output CSS style.
 * CSS preprocessors support.
 * Data:uri embedding.
+* Ligatures.
 * HTML preview.
+* Custom templates.
 
 
 ## Installation
@@ -23,7 +25,6 @@ This plugin requires Grunt 0.4.
 
 ```
 brew install fontforge ttfautohint
-brew install https://raw.github.com/sapegin/grunt-webfont/master/Formula/sfnt2woff.rb
 npm install grunt-webfont --save-dev
 ```
 
@@ -32,9 +33,7 @@ You may need to use `sudo` for `brew`, depending on your setup.
 ### Linux
 
 ```
-sudo apt-get install fontforge eot-utils ttfautohint
-wget http://people.mozilla.com/~jkew/woff/woff-code-latest.zip
-unzip woff-code-latest.zip -d sfnt2woff && cd sfnt2woff && make && sudo mv sfnt2woff /usr/local/bin/
+sudo apt-get install fontforge ttfautohint
 npm install grunt-webfont --save-dev
 ```
 
@@ -54,65 +53,146 @@ Inside your `Gruntfile.js` file add a section named `webfont`. See Parameters se
 
 ### Parameters
 
-#### src `string|array`
+#### src
+
+Type: `string|array`
 
 Glyphs list: SVG or EPS. String or array. Wildcards are supported.
 
-#### dest `string`
+#### dest
+
+Type: `string`
 
 Directory for resulting files.
 
-#### [destCss] `string` (default: `dest` value)
+#### destCss
+
+Type: `string` Default: _`dest` value_
 
 Directory for resulting CSS files (if different than font directory).
 
 #### Options
 
-#### [font] `string` (default: `'icons'`)
+#### font
 
+Type: `string` Default: `icons`
 Name of font and base name of font files.
 
-#### [hashes] `boolean` (default: `true`)
+#### hashes
+
+Type: `boolean` Default: `true`
 
 Append font file names with unique string to flush browser cache when you update your icons.
 
-#### [styles] `string|array` (default: `'font,icon'`)
+#### styles
+
+Type: `string|array` Default: `'font,icon'`
 
 List of styles to be added to CSS files: `font` (`font-face` declaration), `icon` (base `.icon` class), `extra` (extra stuff for Bootstrap (only for `syntax` = `'bootstrap'`).
 
-#### [types] `string|array` (default: `'woff,ttf,eot,svg'`)
+#### types
+
+Type: `string|array` Default: `'eot,woff,ttf'`
 
 Font files types to generate.
 
-#### [syntax] `string` (default: `'bem'`)
+#### order
+
+Type: `string|array` Default: `'eot,woff,ttf,svg'`
+
+Order of `@font-face`’s `src` values in CSS file.
+
+#### syntax
+
+Type: `string` Default: `bem`
 
 Icon classes syntax. `bem` for double class names: `icon icon_awesome` or `bootstrap` for single class names: `icon-awesome`.
 
-#### [template] `string` (default: null)
+
+#### template
+
+Type: `string` Default: `null`
 
 Custom CSS template path (see `tasks/templates` for some examples). Should be used instead of `syntax`. (You probably need to define `htmlDemoTemplate` option too.)
 
-#### [stylesheet] `string` (default: `'css'`)
+Template is a pair of CSS and JSON files with the same name.
+
+For example, your Gruntfile:
+
+```js
+options: {
+  template: 'my_templates/tmpl.css'
+}
+```
+
+`my_templates/tmpl.css`:
+
+```css
+@font-face {
+  font-family:"<%= fontBaseName %>";
+  ...
+}
+...
+```
+
+`my_templates/tmpl.json`:
+
+```json
+{
+  "baseClass": "icon",
+  "classPrefix": "icon_"
+}
+```
+
+#### templateOptions
+
+Type: `object` Default: `{}`
+
+Extends/overrides CSS template or syntax’s JSON file. Allows custom class names in default css templates.
+
+``` javascript
+options: {
+	templateOptions: {
+		baseClass: 'glyph-icon',
+		classPrefix: 'glyph_',
+		mixinPrefix: 'glyph-'
+	}
+}
+```
+
+#### stylesheet
+
+Type: `string` Default: `'css'`
 
 Stylesheet type. Can be css, sass, scss, less... If `sass` or `scss` is used, `_` will prefix the file (so it can be a used as a partial).
 
-#### [relativeFontPath] `string` (default: null)
+#### relativeFontPath
+
+Type: `string` Default: `null`
 
 Custom font path. Will be used instead of `destCss` *in* CSS file. Useful with CSS preprocessors.
 
-#### [htmlDemo] `boolean` (default: `true`)
+#### htmlDemo
+
+Type: `boolean` Default: `true`
 
 If `true`, an HTML file will be available (by default, in `destCSS` folder) to test the render.
 
-#### [htmlDemoTemplate] `string` (default: null)
+#### htmlDemoTemplate
+
+Type: `string` Default: `null`
 
 Custom demo HTML template path (see `tasks/templates/demo.html` for an example) (requires `htmlDemo` option to be true).
 
-#### [destHtml] `string` (default: `destCss` value)
+#### destHtml
+
+Type: `string` Default: _`destCss` value_
 
 Custom demo HTML demo path (requires `htmlDemo` option to be true).
 
-#### [embed] `string|array` (default: false)
+#### embed
+
+Type: `string|array` Default: `false`
 
 If `true` embeds WOFF (*only WOFF*) file as data:uri.
 
@@ -120,20 +200,46 @@ IF `ttf` or `woff` or `ttf,woff` embeds TTF or/and WOFF file.
 
 If there’re more file types in `types` option they will be included as usual `url(font.type)` CSS links.
 
-#### [skip] `boolean` (default: `false`)
+#### ligatures
+
+Type: `boolean` Default: `false`
+
+If `true` the generated font files and stylesheets will be generated with opentype ligature features. The character sequences to be replaced by the ligatures are determined by the file name (without extension) of the original SVG or EPS.
+
+For example, you have a heart icon in `love.svg` file. The HTML `<h1>I <span class="ligature-icons">love</span> you!</h1>` will be rendered as `I ♥ you!`.
+
+#### rename
+
+Type: `function` Default: `path.basename`
+
+You can use this function to change how file names translates to class names (the part after `icon_` or `icon-`). By default it’s a name of a file.
+
+For example you can group your icons into several folders and add folder name to class name:
+
+```js
+options: {
+  rename: function(name) {
+    // .icon_entypo-add, .icon_fontawesome-add, etc.
+    return [path.basename(path.dirname(name)), path.basename(name)].join('-');
+  }
+}
+```
+
+#### skip
+
+Type: `boolean` Default: `false`
 
 If `true` task will not be ran. In example, you can skip task on Windows (becase of difficult installation):
 
-``` javascript
+```javascript
 skip: require('os').platform() === 'win32'
 ```
-
 
 ### Config Examples
 
 #### Simple font generation
 
-``` javascript
+```javascript
 webfont: {
   icons: {
     src: 'icons/*.svg',
@@ -144,14 +250,31 @@ webfont: {
 
 #### Custom font name, fonts and CSS in different folders
 
-``` javascript
+```javascript
 webfont: {
   icons: {
     src: 'icons/*.svg',
     dest: 'build/fonts',
-    destCss: 'build/fonts/css'
+    destCss: 'build/fonts/css',
     options: {
-    	font: 'ponies'
+      font: 'ponies'
+    }
+  }
+}
+```
+
+#### Custom CSS classes
+
+```js
+webfont: {
+  icons: {
+    src: 'icons/*.svg',
+    dest: 'build/fonts',
+    syntax: 'bem',
+    templateOptions: {
+        baseClass: 'glyph-icon',
+        classPrefix: 'glyph_',
+        mixinPrefix: 'glyph-'
     }
   }
 }
@@ -159,15 +282,15 @@ webfont: {
 
 #### To use with CSS preprocessor
 
-``` javascript
+```javascript
 webfont: {
   icons: {
     src: 'icons/*.svg',
     dest: 'build/fonts',
     destCss: 'build/styles',
     options: {
-    	stylesheet: 'styl',
-    	relativeFontPath: '/build/fonts'
+      stylesheet: 'styl',
+      relativeFontPath: '/build/fonts'
     }
   }
 }
@@ -175,19 +298,18 @@ webfont: {
 
 #### Embedded font file
 
-``` javascript
+```javascript
 webfont: {
   icons: {
     src: 'icons/*.svg',
     dest: 'build/fonts',
     options: {
-    	types: 'woff',
-    	embed: true
+      types: 'woff',
+      embed: true
     }
   }
 }
 ```
-
 
 ## CSS Preprocessors Caveats
 
@@ -205,51 +327,13 @@ The LESS mixins then may be used like so:
 
 ```css
 .profile-button {
-	.icon-profile;
+  .icon-profile;
 }
 ```
 
+## Changelog
 
-## Release History
-
-### 2013-06-30 v0.1.5
-
-* `destHtml` option (by [@timhettler](https://github.com/timhettler)).
-* Improved kerning (by [@frekw](https://github.com/frekw)).
-
-### 2013-05-08 v0.1.4
-
-* `htmlDemoTemplate` option (by [@andreu86](https://github.com/andreu86)).
-* Various bug fixes and tweaks (thanks [@MoOx](https://github.com/MoOx), [@iham](https://github.com/iham), [@timhettler](https://github.com/timhettler)).
-
-### 2013-04-30 v0.1.3
-
-* HTML demo works with CSS preprocessors stylesheets.
-* TTF files embedding (by [@katzlbt](https://github.com/katzlbt) and me).
-* Don not stop Grunt when font contains no glyphs (by [@iham](https://github.com/iham)).
-* Better fontforge stdout handling (by [@MoOx](https://github.com/MoOx)).
-
-### 2013-04-13 v0.1.2
-
-* `relativeFontPath` option (by [@gregvanbrug](https://github.com/gregvanbrug)).
-* `template` option.
-* Better LESS support (by [@gregvanbrug](https://github.com/gregvanbrug)).
-* Better Stylus support.
-* Bug fixes.
-
-### 2013-03-17 v0.1.1
-
-* Fix error when generating font with one glyph.
-
-### 2013-02-18 v0.1.0
-
-* Grunt 0.4 support.
-* Separate CSS/font destinations (by [@scanieso](https://github.com/scanieso)).
-* Minimal CSS preprocessors support (by [@MoOx](https://github.com/MoOx)).
-* Updated generator script (by [@MoOx](https://github.com/MoOx) and me).
-* Generated CSS not include broken links to font files.
-* Data:uri WOFF files embedding.
-
+The changelog can be found in the `Changelog.md` file.
 
 ---
 
