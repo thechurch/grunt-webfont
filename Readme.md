@@ -1,4 +1,7 @@
-# SVG to webfont converter for Grunt [![Build Status](https://travis-ci.org/sapegin/grunt-webfont.png)](https://travis-ci.org/sapegin/grunt-webfont)
+# SVG to webfont converter for Grunt
+
+[![Build Status](https://travis-ci.org/sapegin/grunt-webfont.png)](https://travis-ci.org/sapegin/grunt-webfont)
+[![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
 Generate custom icon webfonts from SVG/EPS files via Grunt. Based on [Font Custom](http://endtwist.github.com/fontcustom/).
 
@@ -100,7 +103,7 @@ Font files types to generate.
 
 Type: `string|array` Default: `'eot,woff,ttf,svg'`
 
-Order of `@font-face`’s `src` values in CSS file.
+Order of `@font-face`’s `src` values in CSS file. (Only file types defined in `types` option will be generated.)
 
 #### syntax
 

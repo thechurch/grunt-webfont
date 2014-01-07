@@ -402,7 +402,8 @@ module.exports = function(grunt) {
 
 		function readTemplate(template, syntax, ext) {
 			if (template) {
-				return grunt.file.read(template.replace(/\.css$/, ext));
+				var filename = template.replace(/\.[^\\\/.]+$/, '') + ext;
+				return grunt.file.read(filename);
 			}
 			else {
 				return fs.readFileSync(path.join(__dirname, 'templates/' + syntax + ext), 'utf8');
